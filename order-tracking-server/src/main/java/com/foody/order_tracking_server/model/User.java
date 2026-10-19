@@ -2,15 +2,13 @@ package com.foody.order_tracking_server.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "user")
+@Table(name = "users")
 public class User {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,10 +22,6 @@ public class User {
 
   @Column(nullable = false)
   private String password;
-
-  @Enumerated(EnumType.STRING)
-  @Column(nullable = false)
-  private UserType userType;
 
   public Long getId() {
     return id;
@@ -61,17 +55,9 @@ public class User {
     this.password = password;
   }
 
-  public UserType getUserType() {
-    return userType;
-  }
-
-  public void setUserType(UserType userType) {
-    this.userType = userType;
-  }
-
   @Override
   public String toString() {
-    return "User [id=" + id + ", email=" + email + ", password=" + password + ", userType=" + userType + "]";
+    return "User [id=" + id + ", email=" + email + ", password=" + password + "]";
   }
 
 }

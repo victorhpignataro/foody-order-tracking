@@ -3,17 +3,5 @@
   "references": [
     { "path": "./tsconfig.app.json" },
     { "path": "./tsconfig.node.json" }
-  ],
-  "paths": {
-    "@/*": ["./src/*"],
-    "@components/*": ["./src/components/*"],
-    "@pages/*": ["./src/pages/*"],
-    "@hooks/*": ["./src/hooks/*"],
-    "@utils/*": ["./src/utils/*"],
-    "@assets/*": ["./src/assets/*"],
-    "@api/*": ["./src/api/*"],
-    "@models/*": ["./src/models/*"],
-    "@cypress/*": ["./cypress/*"],
-    "@tests/*": ["./cypress/_root/*"]
-  }
+  ]
 }
