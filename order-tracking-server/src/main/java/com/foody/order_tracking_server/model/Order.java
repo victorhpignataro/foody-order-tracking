@@ -4,9 +4,13 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hibernate.annotations.CreationTimestamp;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -33,12 +37,15 @@ public class Order {
   private List<OrderItem> items = new ArrayList<>();
 
   @Column(nullable = false)
+  @Enumerated(EnumType.STRING)
   private OrderStatusEnum status;
 
   @Column(name = "created_at", nullable = false, updatable = false)
+  @CreationTimestamp
   private LocalDateTime createdAt;
 
   public Order() {
+    this.status = OrderStatusEnum.RECEIVED;
   }
 
   public Long getId() {

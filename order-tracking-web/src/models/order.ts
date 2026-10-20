@@ -1,9 +1,9 @@
 export const ORDER_STATUSES = [
-  'RECEBIDO',
-  'EM_PREPARO',
-  'SAIU_PARA_ENTREGA',
-  'ENTREGUE',
-  'CANCELADO',
+  'RECEIVED',
+  'IN_PREPARATION',
+  'OUT_FOR_DELIVERY',
+  'DELIVERED',
+  'CANCELED',
 ] as const;
 
 export type OrderStatus = (typeof ORDER_STATUSES)[number];
@@ -33,31 +33,31 @@ interface StatusMeta {
 }
 
 export const STATUS_META: Record<OrderStatus, StatusMeta> = {
-  RECEBIDO: {
+  RECEIVED: {
     label: 'Recebido',
     hint: 'Fila de espera',
     color: '#0288D1',
     bg: '#E0F2FE',
   },
-  EM_PREPARO: {
+  IN_PREPARATION: {
     label: 'Em preparo',
     hint: 'Na cozinha',
     color: '#ED6C02',
     bg: '#FFF7ED',
   },
-  SAIU_PARA_ENTREGA: {
+  OUT_FOR_DELIVERY: {
     label: 'Saiu para entrega',
     hint: 'Em rota',
     color: '#7C3AED',
     bg: '#F3E8FF',
   },
-  ENTREGUE: {
+  DELIVERED: {
     label: 'Entregue',
     hint: 'Finalizados',
     color: '#2E7D32',
     bg: '#DCFCE7',
   },
-  CANCELADO: {
+  CANCELED: {
     label: 'Cancelado',
     hint: 'Cancelados',
     color: '#D32F2F',
@@ -66,9 +66,9 @@ export const STATUS_META: Record<OrderStatus, StatusMeta> = {
 };
 
 export const NEXT_STATUS: Record<OrderStatus, OrderStatus[]> = {
-  RECEBIDO: ['EM_PREPARO', 'CANCELADO'],
-  EM_PREPARO: ['SAIU_PARA_ENTREGA', 'CANCELADO'],
-  SAIU_PARA_ENTREGA: ['ENTREGUE', 'CANCELADO'],
-  ENTREGUE: [],
-  CANCELADO: [],
+  RECEIVED: ['IN_PREPARATION', 'CANCELED'],
+  IN_PREPARATION: ['OUT_FOR_DELIVERY', 'CANCELED'],
+  OUT_FOR_DELIVERY: ['DELIVERED', 'CANCELED'],
+  DELIVERED: [],
+  CANCELED: [],
 };

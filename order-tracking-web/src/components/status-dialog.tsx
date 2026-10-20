@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import {
   Alert,
   Box,
@@ -30,11 +30,6 @@ export const StatusDialog = ({ order, onClose, onConfirm }: Props) => {
   const [selected, setSelected] = useState<OrderStatus | ''>('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-
-  useEffect(() => {
-    setSelected(order?.status ?? '');
-    setError('');
-  }, [order]);
 
   if (!order) return null;
 

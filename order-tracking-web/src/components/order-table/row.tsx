@@ -1,4 +1,12 @@
-import { useState } from 'react';
+import { StatusChip } from '@components/status-chip';
+import {
+  NEXT_STATUS,
+  STATUS_META,
+  type Order,
+  type OrderStatus,
+} from '@models/order';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import {
   Box,
   Button,
@@ -9,15 +17,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
-import { StatusChip } from '@components/status-chip';
-import {
-  NEXT_STATUS,
-  STATUS_META,
-  type Order,
-  type OrderStatus,
-} from '../models/order';
+import { useState } from 'react';
 
 interface Props {
   order: Order;
@@ -41,8 +41,6 @@ export const OrderRow = ({ order, onEditStatus, onQuickChange }: Props) => {
   const [open, setOpen] = useState(false);
   const next = NEXT_STATUS[order.status];
   const created = new Date(order.createdAt);
-
-  const summary = order.itens.map((i) => `${i.quantity}x ${i.name}`).join(', ');
 
   return (
     <>
@@ -77,11 +75,7 @@ export const OrderRow = ({ order, onEditStatus, onQuickChange }: Props) => {
           </Typography>
         </TableCell>
         <TableCell sx={{ fontWeight: 600 }}>{order.client}</TableCell>
-        <TableCell sx={{ maxWidth: 240 }}>
-          <Typography variant="body2" noWrap title={summary}>
-            {summary}
-          </Typography>
-        </TableCell>
+
         <TableCell sx={{ maxWidth: 240 }}>
           <Typography variant="body2" noWrap title={order.address}>
             {order.address}
@@ -94,11 +88,12 @@ export const OrderRow = ({ order, onEditStatus, onQuickChange }: Props) => {
           align="center"
           sx={{ whiteSpace: 'nowrap' }}
           onClick={(e) => e.stopPropagation()}>
-          <Tooltip title={next.length ? 'Alterar status' : 'Pedido finalizado'}>
+          <Tooltip
+            title={next?.length ? 'Alterar status' : 'Pedido finalizado'}>
             <span>
               <IconButton
                 size="small"
-                disabled={!next.length}
+                disabled={!next?.length}
                 onClick={() => onEditStatus(order)}>
                 <SwapHorizIcon fontSize="small" />
               </IconButton>
@@ -134,7 +129,7 @@ export const OrderRow = ({ order, onEditStatus, onQuickChange }: Props) => {
                 <Typography variant="subtitle2" sx={{ mb: 1 }}>
                   Itens
                 </Typography>
-                {order.itens.map((item, idx) => (
+                {order.itens?.map((item, idx) => (
                   <Typography key={idx} variant="body2" sx={{ py: 0.5 }}>
                     {item.quantity}x {item.name}
                   </Typography>
@@ -150,11 +145,11 @@ export const OrderRow = ({ order, onEditStatus, onQuickChange }: Props) => {
                 <Typography variant="subtitle2" sx={{ mb: 1 }}>
                   Mover para
                 </Typography>
-                {next.length ? (
+                {next?.length ? (
                   <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                    {next.map((status) => {
+                    {next?.map((status) => {
                       const meta = STATUS_META[status];
-                      const isCancel = status === 'CANCELADO';
+                      const isCancel = status === 'CANCELED';
                       return (
                         <Button
                           key={status}
@@ -172,7 +167,7 @@ export const OrderRow = ({ order, onEditStatus, onQuickChange }: Props) => {
                                   },
                                 }
                           }>
-                          {isCancel ? 'Cancelar pedido' : meta.label}
+                          {isCancel ? 'Cancelar pedido' : meta?.label}
                         </Button>
                       );
                     })}

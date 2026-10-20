@@ -7,11 +7,11 @@ export const StatusChip = ({ status }: { status: OrderStatus }) => {
   return (
     <Chip
       size="small"
-      label={meta.label}
+      label={meta?.label}
       icon={<FiberManualRecordIcon sx={{ fontSize: '10px !important' }} />}
       sx={{
-        bgcolor: meta.bg,
-        color: meta.color,
+        bgcolor: meta?.bg,
+        color: meta?.color,
         fontWeight: 600,
         '& .MuiChip-icon': { color: 'inherit' },
       }}

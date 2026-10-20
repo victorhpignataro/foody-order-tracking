@@ -3,8 +3,8 @@ package com.foody.order_tracking_server.service;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.foody.order_tracking_server.dto.LoginRequestDto;
-import com.foody.order_tracking_server.dto.RegisterRequestDto;
+import com.foody.order_tracking_server.dto.auth.LoginRequestDto;
+import com.foody.order_tracking_server.dto.auth.RegisterRequestDto;
 import com.foody.order_tracking_server.exception.EmailAlreadyExistsException;
 import com.foody.order_tracking_server.exception.InvalidCredentialsException;
 import com.foody.order_tracking_server.model.User;

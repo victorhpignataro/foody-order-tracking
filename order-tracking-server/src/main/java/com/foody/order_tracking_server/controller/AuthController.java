@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.foody.order_tracking_server.dto.LoginRequestDto;
 import com.foody.order_tracking_server.dto.MessageResponseDto;
-import com.foody.order_tracking_server.dto.RegisterRequestDto;
+import com.foody.order_tracking_server.dto.auth.LoginRequestDto;
+import com.foody.order_tracking_server.dto.auth.RegisterRequestDto;
 import com.foody.order_tracking_server.security.JwtAuthFilter;
 import com.foody.order_tracking_server.service.AuthService;
 

@@ -18,6 +18,7 @@ export default defineConfig({
       "@assets": path.resolve(__dirname, "./src/assets"),
       "@api": path.resolve(__dirname, "./src/api"),
       "@models": path.resolve(__dirname, "./src/models"),
+      "@context": path.resolve(__dirname, "./src/context"),
       "@cypress": path.resolve(__dirname, "./cypress"),
       "@tests": path.resolve(__dirname, "./cypress/_root"),
     },

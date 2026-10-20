@@ -2,7 +2,7 @@ import { AppBar, Box, Button, Toolbar, Typography } from '@mui/material';
 import LogoIcon from '@assets/foody-logo.png';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { useNavigate } from 'react-router';
-import { useAuth } from '../context/auth-context/context';
+import { useAuth } from '../../context/auth-context/context';
 
 export const AppHeader = () => {
   const { logout } = useAuth();

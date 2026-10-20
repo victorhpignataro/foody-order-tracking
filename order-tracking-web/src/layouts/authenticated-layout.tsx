@@ -1,8 +1,8 @@
+import { AppHeader } from '@components/main-navbar';
+import { AuthContext } from '@context/auth-context/context';
 import { Box } from '@mui/material';
-import { Navigate, Outlet } from 'react-router';
-import { AppHeader } from '../components/header';
 import { useContext } from 'react';
-import { AuthContext } from '../context/auth-context/context';
+import { Navigate, Outlet } from 'react-router';
 
 export const AuthenticatedLayout = () => {
   const authContext = useContext(AuthContext);
