@@ -19,7 +19,7 @@ export interface OrderItem {
 export interface Order {
   id: number;
   client: string;
-  itens: OrderItem[];
+  items: OrderItem[];
   address: string;
   status: OrderStatus;
   createdAt: string;

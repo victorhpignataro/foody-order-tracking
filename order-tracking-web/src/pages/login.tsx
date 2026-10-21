@@ -45,7 +45,7 @@ const segmentedTabsSx = {
   },
 };
 
-export const LoginPage = () => {
+export const LoginPage: React.FC = () => {
   const [tabValue, setTabValue] = useState(0);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -124,23 +124,19 @@ export const LoginPage = () => {
             alignItems: 'center',
             borderRadius: 2,
             border: '1px solid #E2E8F0',
-            boxShadow:
-              '0 4px 24px rgba(11, 28, 48, 0.08), 0 1px 3px rgba(11, 28, 48, 0.04)',
           }}>
           <Box
             sx={{
-              width: 56,
-              height: 56,
+              padding: 1,
               mb: 2,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              borderRadius: 2,
+              borderRadius: 1,
               bgcolor: 'primary.main',
               color: 'primary.contrastText',
-              boxShadow: '0 6px 16px rgba(211, 47, 47, 0.25)',
             }}>
-            <img src={LogoIconAlt} width={36} height={36}></img>
+            <img src={LogoIconAlt} width={36} height={36} alt="Logo"></img>
           </Box>
 
           <Typography
@@ -292,3 +288,5 @@ export const LoginPage = () => {
     </Box>
   );
 };
+
+export default LoginPage;

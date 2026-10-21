@@ -1,8 +1,5 @@
-import { OrderRow } from '@/components/order-table/row';
-import { AddOutlined } from '@mui/icons-material';
+import { OrderRow } from '@/components/order-table/row/row';
 import {
-  Box,
-  Button,
   Paper,
   Table,
   TableBody,
@@ -11,22 +8,22 @@ import {
   TableHead,
   TablePagination,
   TableRow,
-  Typography,
 } from '@mui/material';
 
 import { ordersApi } from '@/api/order';
 import { useSnackbar } from '@/context/snackbar-context/context';
 import { STATUS_META, type Order, type OrderStatus } from '@/models/order';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { useMemo, useState, type ChangeEvent } from 'react';
-import { useDebounce } from 'use-debounce';
-import { DrawerOrder } from '../order-drawer';
+import React, { useMemo, useState } from 'react';
+import { SpinnerLoader } from '../spinner-loader';
 import { StatusDialog } from '../status-dialog';
-import { RowError } from './row-error';
-import { TableHeader } from './table-header';
-import { TableLoader } from './table-loader';
+import { TableHeader } from './header';
+import { RowEmpty } from './row/row-empty';
+import { RowError } from './row/row-error';
 
-export const OrderTable = () => {
+import { OrderDrawer } from '../order-drawer';
+
+export const OrderTable: React.FC = () => {
   const { toastMessage } = useSnackbar();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [dialogOrder, setDialogOrder] = useState<Order | null>(null);
@@ -36,20 +33,17 @@ export const OrderTable = () => {
     setDrawerOpen(false);
   };
 
-  const handleDialogConfirm = async (id: number, status: OrderStatus) => {
-    await ordersApi.changeStatus(id, status);
-    toastMessage(
-      `Pedido #${id} agora está como ${STATUS_META[status].label.toLowerCase()}.`,
-    );
-  };
-
-  const [searchTerm, setSearchTerm] = useState('');
-  const [debouncedSearchTerm] = useDebounce(searchTerm, 300);
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
 
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
-  const { data, isLoading, isError, refetch } = useQuery({
+  const {
+    data: dataDB,
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery({
     queryKey: ['orders', debouncedSearchTerm, page, rowsPerPage],
     queryFn: () => ordersApi.list(debouncedSearchTerm, page, rowsPerPage),
     placeholderData: keepPreviousData,
@@ -71,29 +65,30 @@ export const OrderTable = () => {
     }
   };
 
-  const filteredOrders = useMemo(() => {
-    const dataContent = data?.content;
+  const dataTable = useMemo(() => {
+    const dataContent = dataDB?.content;
     if (!dataContent) return [];
     return dataContent;
-  }, [data]);
+  }, [dataDB]);
 
   const handleRefresh = () => {
     refetch();
   };
 
-  const isEmpty = !isLoading && !isError && filteredOrders.length === 0;
-  const isTrulyEmpty = !isLoading && !isError && (!data || data.length === 0);
+  const isEmpty = !isLoading && !isError && dataTable.length === 0;
+  const isTrulyEmpty =
+    !isLoading && !isError && (!dataTable || dataTable.length === 0);
 
   return (
     <>
       <TableHeader
         handleRefresh={handleRefresh}
         isLoading={isLoading}
-        search={searchTerm}
-        onSearchChange={(event: ChangeEvent<HTMLInputElement>) => {
-          setSearchTerm(event.target.value);
+        onSearchChange={(debouncedSearchTerm: string) => {
+          setDebouncedSearchTerm(debouncedSearchTerm);
         }}
-        onClickNewOrder={toggleOrderDrawer(true)}></TableHeader>
+        onClickNewOrder={toggleOrderDrawer(true)}
+      />
       <Paper
         variant="outlined"
         sx={{
@@ -113,7 +108,7 @@ export const OrderTable = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {filteredOrders.map((order) => (
+              {dataTable.map((order) => (
                 <OrderRow
                   key={order.id}
                   order={order}
@@ -124,44 +119,23 @@ export const OrderTable = () => {
                 />
               ))}
               {isEmpty && (
-                <TableRow>
-                  <TableCell colSpan={7} align="center" sx={{ py: 6 }}>
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        gap: 2,
-                      }}>
-                      <Typography color="text.secondary" sx={{ mb: 1 }}>
-                        {isTrulyEmpty
-                          ? 'Nenhum pedido cadastrado.'
-                          : 'Nenhum pedido encontrado'}
-                      </Typography>
-                      {isTrulyEmpty && (
-                        <Button
-                          variant="contained"
-                          startIcon={<AddOutlined />}
-                          onClick={toggleOrderDrawer(true)}>
-                          Criar primeiro pedido
-                        </Button>
-                      )}
-                    </Box>
-                  </TableCell>
-                </TableRow>
+                <RowEmpty
+                  isTrulyEmpty={isTrulyEmpty}
+                  toggleOrderDrawer={toggleOrderDrawer}
+                />
               )}
-              {isError && <RowError handleRefresh={handleRefresh}></RowError>}
+              {isError && <RowError handleRefresh={handleRefresh} />}
             </TableBody>
           </Table>
         </TableContainer>
         <TablePagination
           component="div"
-          count={data?.totalElements}
+          count={dataDB?.totalElements ?? 0}
           page={page}
-          onPageChange={(_e, p) => setPage(p)}
+          onPageChange={(_event, page) => setPage(page)}
           rowsPerPage={rowsPerPage}
-          onRowsPerPageChange={(e) => {
-            setRowsPerPage(Number(e.target.value));
+          onRowsPerPageChange={(event) => {
+            setRowsPerPage(Number(event.target.value));
             setPage(0);
           }}
           rowsPerPageOptions={[5, 10, 25, 50]}
@@ -171,17 +145,13 @@ export const OrderTable = () => {
           }
         />
 
-        {(isLoading || isError) && <TableLoader isLoading={isLoading} />}
+        {(isLoading || isError) && <SpinnerLoader isLoading={isLoading} />}
       </Paper>
-      <DrawerOrder
+      <OrderDrawer
         drawerOpen={drawerOpen}
-        handleCloseDrawer={handleCloseOrderDrawer}
+        onCloseDrawer={handleCloseOrderDrawer}
       />
-      <StatusDialog
-        order={dialogOrder}
-        onClose={() => setDialogOrder(null)}
-        onConfirm={handleDialogConfirm}
-      />
+      <StatusDialog order={dialogOrder} onClose={() => setDialogOrder(null)} />
     </>
   );
 };

@@ -11,6 +11,11 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 
 @Entity
 @Table(name = "order_item")
@@ -20,9 +25,13 @@ public class OrderItem {
   private Long id;
 
   @Column(nullable = false)
+  @NotBlank(message = "O nome do item é obrigatório")
+  @Size(max = 256, message = "O nome do item deve conter no máximo 256 caracteres")
   private String name;
 
   @Column(nullable = false)
+  @NotNull(message = "A quantidade é obrigatória")
+  @Positive(message = "A quantidade deve ser maior que zero")
   private Integer quantity;
 
   @ManyToOne(fetch = FetchType.LAZY)
@@ -30,6 +39,8 @@ public class OrderItem {
   private Order order;
 
   @Column(nullable = false, precision = 10, scale = 2)
+  @NotNull(message = "O preço unitário é obrigatório")
+  @DecimalMin(value = "0.00", message = "O preço unitário não pode ser negativo")
   private BigDecimal unitPrice;
 
   public OrderItem() {

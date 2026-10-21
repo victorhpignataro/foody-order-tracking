@@ -1,9 +1,6 @@
 import { createBrowserRouter } from 'react-router';
 import App from './App';
-
-import { HomePage } from '@pages/home.tsx';
-import { LoginPage } from '@pages/login.tsx';
-import { AuthenticatedLayout } from './layouts/authenticated-layout.tsx';
+import { SpinnerLoader } from './components/spinner-loader/index.tsx';
 import { ErrorPage } from './pages/error-page.tsx';
 
 export const router = createBrowserRouter([
@@ -11,18 +8,29 @@ export const router = createBrowserRouter([
     path: '/',
     element: <App />,
     errorElement: <ErrorPage />,
+    HydrateFallback: () => <SpinnerLoader isLoading />,
     children: [
       {
         path: 'login',
-        element: <LoginPage />,
+        lazy: async () => {
+          const { LoginPage } = await import('@/pages/login.tsx');
+          return { Component: LoginPage };
+        },
       },
       {
         path: '',
-        element: <AuthenticatedLayout />,
+        lazy: async () => {
+          const { AuthenticatedLayout } =
+            await import('./layouts/authenticated-layout.tsx');
+          return { Component: AuthenticatedLayout };
+        },
         children: [
           {
             path: 'home',
-            element: <HomePage />,
+            lazy: async () => {
+              const { HomePage } = await import('@pages/home');
+              return { Component: HomePage };
+            },
           },
         ],
       },

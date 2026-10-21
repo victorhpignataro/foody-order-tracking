@@ -1,5 +1,8 @@
 package com.foody.order_tracking_server.service;
 
+import java.util.Locale;
+
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -26,19 +29,26 @@ public class AuthService {
   }
 
   public void register(RegisterRequestDto request) {
-    if (userRepository.findByEmail(request.email()).isPresent()) {
-      throw new EmailAlreadyExistsException(request.email());
+    String email = normalizeEmail(request.email());
+
+    if (userRepository.findByEmail(email).isPresent()) {
+      throw new EmailAlreadyExistsException(email);
     }
 
     User user = new User();
-    user.setName(request.name());
-    user.setEmail(request.email());
+    user.setName(request.name().strip());
+    user.setEmail(email);
     user.setPassword(passwordEncoder.encode(request.password()));
-    userRepository.save(user);
+
+    try {
+      userRepository.save(user);
+    } catch (DataIntegrityViolationException e) {
+      throw new EmailAlreadyExistsException(email);
+    }
   }
 
   public LoginResult authenticate(LoginRequestDto request) {
-    User user = userRepository.findByEmail(request.email())
+    User user = userRepository.findByEmail(normalizeEmail(request.email()))
         .orElseThrow(InvalidCredentialsException::new);
 
     if (!passwordEncoder.matches(request.password(), user.getPassword())) {
@@ -47,6 +57,10 @@ public class AuthService {
 
     String token = jwtService.generateToken(user.getEmail());
     return new LoginResult(token, user.getName());
+  }
+
+  private static String normalizeEmail(String email) {
+    return email.strip().toLowerCase(Locale.ROOT);
   }
 
   public record LoginResult(String token, String nome) {

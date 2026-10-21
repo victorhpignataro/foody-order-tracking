@@ -16,6 +16,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 @Entity
@@ -26,10 +27,12 @@ public class Order {
   private Long id;
 
   @Column(name = "client")
-  @Size(max = 150, message = "O cliente deve conter no máximo 150 caracteres")
+  @NotBlank(message = "O cliente é obrigatório")
+  @Size(max = 256, message = "O cliente deve conter no máximo 256 caracteres")
   private String client;
 
   @Column(name = "address")
+  @NotBlank(message = "O endereço é obrigatório")
   @Size(max = 256, message = "O endereço deve conter no máximo 256 caracteres")
   private String address;
 

@@ -1,5 +1,12 @@
 import React, { useState } from 'react';
 import { AuthContext } from './context';
+import { loginApi } from '@/api/login';
+
+const getErrorMessage = (err: unknown, fallback: string): string => {
+  if (err instanceof Error) return err.message;
+  if (typeof err === 'string') return err;
+  return fallback;
+};
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
@@ -7,39 +14,33 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   });
 
   const login = async (email: string, password: string) => {
-    const response = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    });
-
-    if (!response.ok) {
-      const err = await response.json().catch(() => ({}));
-      throw new Error(err.message || 'Erro ao realizar login.');
+    try {
+      await loginApi.login({ email, password });
+      localStorage.setItem('userIsLoggedUI', 'true');
+      setIsAuthenticated(true);
+    } catch (err) {
+      throw new Error(getErrorMessage(err, 'Erro ao realizar login.'), {
+        cause: err,
+      });
     }
-
-    localStorage.setItem('userIsLoggedUI', 'true');
-    setIsAuthenticated(true);
   };
 
   const register = async (name: string, email: string, password: string) => {
-    const response = await fetch('/api/auth/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, password }),
-    });
-
-    if (!response.ok) {
-      const err = await response.json().catch(() => ({}));
-      throw new Error(err.message || 'Erro ao realizar cadastro.');
+    try {
+      await loginApi.register({ name, email, password });
+    } catch (err) {
+      throw new Error(getErrorMessage(err, 'Erro ao realizar cadastro.'), {
+        cause: err,
+      });
     }
   };
 
   const logout = async () => {
     try {
-      await fetch('/api/auth/logout', {
-        method: 'POST',
-        credentials: 'include',
+      await loginApi.logout();
+    } catch (err) {
+      throw new Error(getErrorMessage(err, 'Houve um erro ao sair'), {
+        cause: err,
       });
     } finally {
       localStorage.removeItem('userIsLoggedUI');

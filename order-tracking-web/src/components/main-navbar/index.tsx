@@ -25,7 +25,7 @@ export const AppHeader = () => {
             width: 28,
             height: 28,
           }}>
-          <img src={LogoIcon} height={28} width={28}></img>
+          <img src={LogoIcon} height={28} width={28} alt="Logo"></img>
         </Box>
         <Typography
           variant="h6"

@@ -1,6 +1,5 @@
+import { OrderTable } from '@components/order-table';
 import { Box, Container } from '@mui/material';
-
-import { OrderTable } from '@/components/order-table';
 
 export const HomePage = () => {
   return (

@@ -1,7 +1,8 @@
-export enum ResponseStatus {
-  SUCCESS = 'SUCCESS',
-  ERROR = 'ERROR',
-}
+export const ResponseStatus = {
+  SUCCESS: 'SUCCESS',
+  ERROR: 'ERROR',
+} as const;
+
 export type DataContent<T> = {
   content: T;
   pageable: {

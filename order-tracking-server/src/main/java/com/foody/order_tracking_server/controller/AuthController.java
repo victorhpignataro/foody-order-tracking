@@ -26,6 +26,7 @@ public class AuthController {
 
   private final AuthService authService;
   private final long expirationMs;
+  private final boolean cookieSecure;
 
   public AuthController(
       AuthService authService,
@@ -33,6 +34,7 @@ public class AuthController {
       @Value("${cookie.secure:false}") boolean cookieSecure) {
     this.authService = authService;
     this.expirationMs = expirationMs;
+    this.cookieSecure = cookieSecure;
   }
 
   @PostMapping("/register")
@@ -61,7 +63,7 @@ public class AuthController {
   private ResponseCookie buildCookie(String value, long maxAgeMs) {
     return ResponseCookie.from(JwtAuthFilter.ACCESS_COOKIE, value)
         .httpOnly(true)
-        .secure(false)
+        .secure(cookieSecure)
         .sameSite("Strict")
         .path("/")
         .maxAge(Duration.ofMillis(maxAgeMs))

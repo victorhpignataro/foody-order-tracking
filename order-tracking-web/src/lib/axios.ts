@@ -2,10 +2,14 @@ import axios from 'axios';
 
 const baseURL = import.meta.env.VITE_API_URL ?? 'http://localhost:8080';
 
+const timeout = 30000;
+
+export const apiAuth = axios.create({ baseURL, timeout });
+
 export const api = axios.create({
   baseURL,
   withCredentials: true,
-  timeout: 30000,
+  timeout,
 });
 
 api.interceptors.response.use(

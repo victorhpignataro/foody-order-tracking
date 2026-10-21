@@ -57,7 +57,8 @@ public class User {
 
   @Override
   public String toString() {
-    return "User [id=" + id + ", email=" + email + ", password=" + password + "]";
+    // O hash da senha nunca deve aparecer em logs.
+    return "User [id=" + id + ", email=" + email + "]";
   }
 
 }

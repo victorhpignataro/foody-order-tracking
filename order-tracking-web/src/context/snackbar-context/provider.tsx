@@ -7,14 +7,17 @@ export const SnackbarProvider = ({ children }: { children: ReactNode }) => {
   const [message, setMessage] = useState('');
   const [severity, setSeverity] = useState<AlertColor>('success');
 
-  const notify = useCallback((msg: string, sev: AlertColor = 'success') => {
-    setMessage(msg);
-    setSeverity(sev);
-    setOpen(true);
-  }, []);
+  const toastMessage = useCallback(
+    (msg: string, sev: AlertColor = 'success') => {
+      setMessage(msg);
+      setSeverity(sev);
+      setOpen(true);
+    },
+    [],
+  );
 
   return (
-    <SnackbarContext.Provider value={{ toastMessage: notify }}>
+    <SnackbarContext.Provider value={{ toastMessage }}>
       {children}
       <Snackbar
         open={open}

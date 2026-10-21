@@ -58,6 +58,7 @@ public class OrderService {
     return orderMapper.entityToDto(saved);
   }
 
+  @Transactional(readOnly = true)
   public Page<OrderDto> search(String search, Pageable pageable) {
     if (search == null || search.isBlank()) {
       return orderRepository.findAll(pageable).map(orderMapper::entityToDto);

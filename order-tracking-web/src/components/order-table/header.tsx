@@ -4,23 +4,33 @@ import {
   SearchOutlined,
 } from '@mui/icons-material';
 import { Box, Button, InputAdornment, Paper, TextField } from '@mui/material';
-import type { ChangeEvent } from 'react';
+import { useEffect, useState, type ChangeEvent } from 'react';
+import { useDebounce } from 'use-debounce';
 
 type Props = {
   handleRefresh: () => void;
   isLoading: boolean;
-  search: string;
-  onSearchChange: (event: ChangeEvent<HTMLInputElement>) => void;
+  onSearchChange: (debouncedSearchTerm: string) => void;
   onClickNewOrder: () => void;
 };
 
 export const TableHeader = ({
   handleRefresh,
   isLoading,
-  search,
   onSearchChange,
   onClickNewOrder,
 }: Props) => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearchTerm] = useDebounce(searchTerm, 300);
+
+  useEffect(() => {
+    onSearchChange(debouncedSearchTerm);
+  }, [debouncedSearchTerm, onSearchChange]);
+
+  const handleOnChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(event.target.value);
+  };
+
   return (
     <Paper
       variant="outlined"
@@ -33,9 +43,9 @@ export const TableHeader = ({
       <Box sx={{ flex: 1, display: 'flex', gap: 2 }}>
         <TextField
           size="small"
-          placeholder="Buscar por número ou cliente"
-          value={search}
-          onChange={onSearchChange}
+          placeholder="Buscar por numero do pedido"
+          value={searchTerm}
+          onChange={handleOnChange}
           sx={{ flex: 1, minWidth: 200, maxWidth: 700 }}
           slotProps={{
             input: {
@@ -58,6 +68,7 @@ export const TableHeader = ({
         <Button
           variant="outlined"
           color="inherit"
+          size="small"
           startIcon={<RefreshOutlined />}
           onClick={handleRefresh}
           disabled={isLoading}

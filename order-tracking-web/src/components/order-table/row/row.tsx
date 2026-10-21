@@ -1,3 +1,4 @@
+import { timeAgo } from '@/utils/formatters';
 import { StatusChip } from '@components/status-chip';
 import {
   NEXT_STATUS,
@@ -10,6 +11,7 @@ import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import {
   Box,
   Button,
+  Chip,
   Collapse,
   IconButton,
   TableCell,
@@ -25,31 +27,34 @@ interface Props {
   onQuickChange: (id: number, status: OrderStatus) => void;
 }
 
-function timeAgo(iso: string) {
-  const min = Math.max(
-    0,
-    Math.round((Date.now() - new Date(iso).getTime()) / 60000),
-  );
-  if (min < 1) return 'agora';
-  if (min < 60) return `há ${min} min`;
-  const hours = Math.floor(min / 60);
-  if (hours < 24) return `há ${hours} h`;
-  return `há ${Math.floor(hours / 24)} d`;
-}
-
 export const OrderRow = ({ order, onEditStatus, onQuickChange }: Props) => {
   const [open, setOpen] = useState(false);
   const next = NEXT_STATUS[order.status];
   const created = new Date(order.createdAt);
 
+  const toggleOpen = () => setOpen((current) => !current);
+
+  const formattedCreatedTime = created.toLocaleTimeString('pt-BR', {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+
+  const formattedDate = created.toLocaleDateString('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+  });
+
   return (
     <>
       <TableRow
         hover
-        onClick={() => setOpen((v) => !v)}
+        onClick={toggleOpen}
         sx={{
           cursor: 'pointer',
-          '& > td': { borderBottom: open ? 0 : undefined },
+          bgcolor: open ? '#fbfbfb' : 'unset',
+          '> td': {
+            borderBottom: '1px solid #eee',
+          },
         }}>
         <TableCell
           sx={{
@@ -59,21 +64,14 @@ export const OrderRow = ({ order, onEditStatus, onQuickChange }: Props) => {
           }}>
           #{order.id}
         </TableCell>
+
         <TableCell sx={{ whiteSpace: 'nowrap' }}>
-          <Typography variant="subtitle2">
-            {created.toLocaleTimeString('pt-BR', {
-              hour: '2-digit',
-              minute: '2-digit',
-            })}
-          </Typography>
+          <Typography variant="subtitle2">{formattedCreatedTime}</Typography>
           <Typography variant="caption" color="text.secondary">
-            {created.toLocaleDateString('pt-BR', {
-              day: '2-digit',
-              month: '2-digit',
-            })}
-            , {timeAgo(order.createdAt)}
+            {formattedDate}, {timeAgo(order.createdAt)}
           </Typography>
         </TableCell>
+
         <TableCell sx={{ fontWeight: 600 }}>{order.client}</TableCell>
 
         <TableCell sx={{ maxWidth: 240 }}>
@@ -81,28 +79,28 @@ export const OrderRow = ({ order, onEditStatus, onQuickChange }: Props) => {
             {order.address}
           </Typography>
         </TableCell>
-        <TableCell>
+
+        <TableCell width={270}>
           <StatusChip status={order.status} />
         </TableCell>
+
         <TableCell
           align="center"
           sx={{ whiteSpace: 'nowrap' }}
           onClick={(e) => e.stopPropagation()}>
           <Tooltip
             title={next?.length ? 'Alterar status' : 'Pedido finalizado'}>
-            <span>
-              <IconButton
-                size="small"
-                disabled={!next?.length}
-                onClick={() => onEditStatus(order)}>
-                <SwapHorizIcon fontSize="small" />
-              </IconButton>
-            </span>
+            <IconButton
+              size="small"
+              disabled={!next?.length}
+              onClick={() => onEditStatus(order)}>
+              <SwapHorizIcon fontSize="small" />
+            </IconButton>
           </Tooltip>
           <IconButton
             size="small"
             aria-label={open ? 'Recolher detalhes' : 'Ver detalhes'}
-            onClick={() => setOpen((v) => !v)}
+            onClick={toggleOpen}
             sx={{
               transform: open ? 'rotate(180deg)' : 'none',
               transition: 'transform 0.2s',
@@ -121,31 +119,59 @@ export const OrderRow = ({ order, onEditStatus, onQuickChange }: Props) => {
                 p: 2,
                 display: 'grid',
                 gap: 3,
-                gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
-                bgcolor: 'background.default',
+                gridTemplateColumns: { xs: '1fr', md: '3fr 1fr' },
+                bgcolor: '#fbfbfb',
                 borderRadius: 1,
               }}>
               <Box>
-                <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                <Typography
+                  variant="subtitle2"
+                  sx={{
+                    mb: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 0.75,
+                  }}>
+                  <Box
+                    component={'span'}
+                    sx={{
+                      fontWeight: 600,
+                      color: 'primary.main',
+                    }}>
+                    Pedido#{order.id}
+                  </Box>
+                  <Box
+                    sx={{
+                      width: 5,
+                      height: 5,
+                      bgcolor: '#ccc',
+                      borderRadius: '100%',
+                    }}></Box>
                   Itens
                 </Typography>
-                {order.itens?.map((item, idx) => (
-                  <Typography key={idx} variant="body2" sx={{ py: 0.5 }}>
-                    {item.quantity}x {item.name}
-                  </Typography>
-                ))}
+                <Box sx={{ display: 'flex', gap: 1.5 }}>
+                  {order.items?.map((item, idx) => (
+                    <Chip
+                      key={idx}
+                      size="small"
+                      label={`${item.quantity}x ${item.name}`}></Chip>
+                  ))}
+                </Box>
                 <Typography
                   variant="caption"
                   color="text.secondary"
                   sx={{ display: 'block', mt: 1 }}>
-                  Entrega: {order.address}
+                  <Box component={'span'} sx={{ fontWeight: 700 }}>
+                    Endereço:{' '}
+                  </Box>
+                  {order.address}
                 </Typography>
               </Box>
-              <Box>
-                <Typography variant="subtitle2" sx={{ mb: 1 }}>
-                  Mover para
-                </Typography>
-                {next?.length ? (
+              {next?.length ? (
+                <Box>
+                  <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                    Mover para
+                  </Typography>
                   <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                     {next?.map((status) => {
                       const meta = STATUS_META[status];
@@ -154,30 +180,24 @@ export const OrderRow = ({ order, onEditStatus, onQuickChange }: Props) => {
                         <Button
                           key={status}
                           size="small"
-                          variant={isCancel ? 'outlined' : 'contained'}
+                          variant="contained"
                           onClick={() => onQuickChange(order.id, status)}
-                          sx={
-                            isCancel
-                              ? { color: meta.color, borderColor: meta.color }
-                              : {
-                                  bgcolor: meta.color,
-                                  '&:hover': {
-                                    bgcolor: meta.color,
-                                    opacity: 0.9,
-                                  },
-                                }
-                          }>
-                          {isCancel ? 'Cancelar pedido' : meta?.label}
+                          sx={{
+                            bgcolor: meta.color,
+                            '&:hover': {
+                              bgcolor: meta.color,
+                              opacity: 0.9,
+                            },
+                          }}>
+                          {isCancel ? 'Cancelado' : meta?.label}
                         </Button>
                       );
                     })}
                   </Box>
-                ) : (
-                  <Typography variant="body2" color="text.secondary">
-                    Este pedido está finalizado e não aceita novas mudanças.
-                  </Typography>
-                )}
-              </Box>
+                </Box>
+              ) : (
+                <Box>Pedido finalizado</Box>
+              )}
             </Box>
           </Collapse>
         </TableCell>
