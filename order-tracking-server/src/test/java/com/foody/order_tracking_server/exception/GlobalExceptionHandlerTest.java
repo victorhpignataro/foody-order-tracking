@@ -8,8 +8,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
-import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -20,10 +20,6 @@ import com.foody.order_tracking_server.model.OrderStatusEnum;
 import com.foody.order_tracking_server.service.JwtService;
 import com.foody.order_tracking_server.service.OrderService;
 
-/**
- * Testes do tratamento global de erros com os filtros de segurança desativados
- * (o foco aqui é o mapeamento exceção -> status HTTP + corpo padronizado).
- */
 @WebMvcTest(controllers = OrderController.class)
 @AutoConfigureMockMvc(addFilters = false)
 class GlobalExceptionHandlerTest {
@@ -40,12 +36,12 @@ class GlobalExceptionHandlerTest {
     @Test
     void handleOrderNotFoundException_ShouldReturn404() throws Exception {
         when(orderService.findById(999L))
-            .thenThrow(new OrderNotFoundException(999L));
+                .thenThrow(new OrderNotFoundException(999L));
 
         mockMvc.perform(get("/api/order/999"))
-            .andExpect(status().isNotFound())
-            .andExpect(jsonPath("$.code").value("ORDER_NOT_FOUND"))
-            .andExpect(jsonPath("$.message").value("Pedido não encontrado: 999"));
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("ORDER_NOT_FOUND"))
+                .andExpect(jsonPath("$.message").value("Pedido não encontrado: 999"));
     }
 
     @Test
@@ -54,61 +50,61 @@ class GlobalExceptionHandlerTest {
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
-                    {
-                        "client": "",
-                        "address": "",
-                        "items": []
-                    }
-                    """))
-            .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
-            .andExpect(jsonPath("$.message").exists());
+                        {
+                            "client": "",
+                            "address": "",
+                            "items": []
+                        }
+                        """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.message").exists());
     }
 
     @Test
     void handleInvalidStatusTransition_ShouldReturn409() throws Exception {
         when(orderService.changeStatus(eq(1L), eq(OrderStatusEnum.DELIVERED)))
-            .thenThrow(new InvalidStatusTransitionException(
-                OrderStatusEnum.RECEIVED, OrderStatusEnum.DELIVERED));
+                .thenThrow(new InvalidStatusTransitionException(
+                        OrderStatusEnum.RECEIVED, OrderStatusEnum.DELIVERED));
 
         mockMvc.perform(patch("/api/order/1/status")
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
-                    { "status": "DELIVERED" }
-                    """))
-            .andExpect(status().isConflict())
-            .andExpect(jsonPath("$.code").value("INVALID_STATUS_TRANSITION"));
+                        { "status": "DELIVERED" }
+                        """))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("INVALID_STATUS_TRANSITION"));
     }
 
     @Test
     void handleAccessDenied_ShouldReturn403() throws Exception {
         when(orderService.findById(1L))
-            .thenThrow(new AccessDeniedException("negado"));
+                .thenThrow(new AccessDeniedException("negado"));
 
         mockMvc.perform(get("/api/order/1"))
-            .andExpect(status().isForbidden())
-            .andExpect(jsonPath("$.code").value("FORBIDDEN"));
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("FORBIDDEN"));
     }
 
     @Test
     void handleUnsupportedMethod_ShouldPreserve405() throws Exception {
         mockMvc.perform(delete("/api/order"))
-            .andExpect(status().isMethodNotAllowed())
-            .andExpect(jsonPath("$.code").value("METHOD_NOT_ALLOWED"));
+                .andExpect(status().isMethodNotAllowed())
+                .andExpect(jsonPath("$.code").value("METHOD_NOT_ALLOWED"));
     }
 
     @Test
     void handleUnexpectedException_ShouldReturn500WithoutInternalDetails() throws Exception {
         when(orderService.findById(1L))
-            .thenThrow(new IllegalStateException("detalhe interno que não deve vazar"));
+                .thenThrow(new IllegalStateException("detalhe interno que não deve vazar"));
 
         mockMvc.perform(get("/api/order/1"))
-            .andExpect(status().isInternalServerError())
-            .andExpect(jsonPath("$.code").value("INTERNAL_ERROR"))
-            .andExpect(jsonPath("$.message").value("Erro interno inesperado."))
-            .andExpect(jsonPath("$.stackTrace").doesNotExist())
-            .andExpect(jsonPath("$.trace").doesNotExist());
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.code").value("INTERNAL_ERROR"))
+                .andExpect(jsonPath("$.message").value("Erro interno inesperado."))
+                .andExpect(jsonPath("$.stackTrace").doesNotExist())
+                .andExpect(jsonPath("$.trace").doesNotExist());
     }
 
     @Test
@@ -117,7 +113,7 @@ class GlobalExceptionHandlerTest {
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{ \"client\": "))
-            .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.code").value("INVALID_REQUEST_BODY"));
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_REQUEST_BODY"));
     }
 }
