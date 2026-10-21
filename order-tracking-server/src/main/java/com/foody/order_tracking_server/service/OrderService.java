@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.foody.order_tracking_server.dto.order.OrderCreateDto;
 import com.foody.order_tracking_server.dto.order.OrderDto;
+import com.foody.order_tracking_server.exception.InvalidStatusTransitionException;
 import com.foody.order_tracking_server.exception.OrderNotFoundException;
 import com.foody.order_tracking_server.mappers.OrderMapper;
 import com.foody.order_tracking_server.model.Order;
@@ -51,6 +52,10 @@ public class OrderService {
   public OrderDto changeStatus(Long orderId, OrderStatusEnum newStatus) {
     Order entity = orderRepository.findById(orderId)
         .orElseThrow(() -> new OrderNotFoundException(orderId));
+
+    if (!entity.getStatus().canTransitionTo(newStatus)) {
+      throw new InvalidStatusTransitionException(entity.getStatus(), newStatus);
+    }
 
     entity.setStatus(newStatus);
     Order saved = orderRepository.save(entity);

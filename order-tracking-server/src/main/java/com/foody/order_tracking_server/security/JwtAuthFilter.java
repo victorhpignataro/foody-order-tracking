@@ -9,10 +9,12 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.foody.order_tracking_server.service.JwtService;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -43,14 +45,18 @@ public class JwtAuthFilter extends OncePerRequestFilter {
       try {
         String login = jwtService.extractLogin(token);
 
-        if (login != null) {
+        if (StringUtils.hasText(login)) {
           UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
               login, null, Collections.emptyList());
           authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
           SecurityContextHolder.getContext().setAuthentication(authToken);
         }
+      } catch (ExpiredJwtException e) {
+        logger.debug("Token JWT expirado. Requisição seguirá sem autenticação.");
       } catch (JwtException | IllegalArgumentException e) {
-        logger.warn("JWT inválido ou expirado: " + e.getMessage());
+
+        logger.warn("Token JWT rejeitado (" + e.getClass().getSimpleName()
+            + "). Requisição seguirá sem autenticação.");
       }
     }
 
@@ -65,6 +71,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     return Arrays.stream(cookies)
         .filter(c -> ACCESS_COOKIE.equals(c.getName()))
         .map(Cookie::getValue)
+        .filter(StringUtils::hasText)
         .findFirst()
         .orElse(null);
   }

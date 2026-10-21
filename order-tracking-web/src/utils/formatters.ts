@@ -1,3 +1,28 @@
+const currencyFormatter = new Intl.NumberFormat('pt-BR', {
+  style: 'currency',
+  currency: 'BRL',
+});
+
+export function formatCurrency(value: number) {
+  return currencyFormatter.format(Number.isFinite(value) ? value : 0);
+}
+
+export function formatCurrencyInput(value: number | undefined | null) {
+  if (value === undefined || value === null || !Number.isFinite(value)) {
+    return '';
+  }
+
+  return formatCurrency(value);
+}
+
+export function parseCurrencyInput(value: string) {
+  const digits = value.replace(/\D/g, '');
+
+  if (!digits) return undefined;
+
+  return Number(digits) / 100;
+}
+
 export function timeAgo(iso: string) {
   const min = Math.max(
     0,

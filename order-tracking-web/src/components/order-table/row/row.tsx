@@ -1,4 +1,4 @@
-import { timeAgo } from '@/utils/formatters';
+import { formatCurrency, timeAgo } from '@/utils/formatters';
 import { StatusChip } from '@components/status-chip';
 import {
   NEXT_STATUS,
@@ -43,6 +43,11 @@ export const OrderRow = ({ order, onEditStatus, onQuickChange }: Props) => {
     day: '2-digit',
     month: '2-digit',
   });
+
+  const total = (order.items ?? []).reduce(
+    (sum, item) => sum + item.unitPrice * item.quantity,
+    0,
+  );
 
   return (
     <>
@@ -132,14 +137,13 @@ export const OrderRow = ({ order, onEditStatus, onQuickChange }: Props) => {
                     alignItems: 'center',
                     gap: 0.75,
                   }}>
-                  <Box
-                    component={'span'}
+                  <Typography
                     sx={{
                       fontWeight: 600,
                       color: 'primary.main',
                     }}>
                     Pedido#{order.id}
-                  </Box>
+                  </Typography>
                   <Box
                     sx={{
                       width: 5,
@@ -149,22 +153,86 @@ export const OrderRow = ({ order, onEditStatus, onQuickChange }: Props) => {
                     }}></Box>
                   Itens
                 </Typography>
-                <Box sx={{ display: 'flex', gap: 1.5 }}>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                   {order.items?.map((item, idx) => (
                     <Chip
                       key={idx}
                       size="small"
-                      label={`${item.quantity}x ${item.name}`}></Chip>
+                      label={
+                        <Box
+                          component="span"
+                          sx={{
+                            display: 'inline-flex',
+                            alignItems: 'baseline',
+                            gap: 0.75,
+                          }}>
+                          <Box
+                            component="span"
+                            sx={{
+                              fontWeight: 700,
+                              fontSize: 12,
+                              fontVariantNumeric: 'tabular-nums',
+                              color: 'primary.main',
+                              bgcolor: 'primary.50',
+                              px: 0.75,
+                              py: 0.25,
+                              borderRadius: 1,
+                              lineHeight: 1.2,
+                            }}>
+                            {item.quantity}×
+                          </Box>
+
+                          <Box component="span" sx={{ fontWeight: 600 }}>
+                            {item.name}
+                          </Box>
+
+                          <Box
+                            component="span"
+                            sx={{
+                              color: 'text.secondary',
+                              fontSize: 12,
+                              fontVariantNumeric: 'tabular-nums',
+                            }}>
+                            {formatCurrency(item.unitPrice)}
+                            <Box
+                              component="span"
+                              sx={{ ml: 0.25, fontSize: 11, opacity: 0.75 }}>
+                              /un
+                            </Box>
+                          </Box>
+                        </Box>
+                      }
+                      sx={{
+                        bgcolor: 'background.paper',
+                        border: '1px solid',
+                        borderColor: 'divider',
+                        boxShadow: '0 1px 2px rgba(15, 23, 42, 0.08)',
+                        height: 'auto',
+                        '& .MuiChip-label': {
+                          py: 0.75,
+                          px: 1,
+                        },
+                      }}
+                    />
                   ))}
                 </Box>
                 <Typography
                   variant="caption"
                   color="text.secondary"
                   sx={{ display: 'block', mt: 1 }}>
-                  <Box component={'span'} sx={{ fontWeight: 700 }}>
+                  <Typography sx={{ fontWeight: 700, fontSize: 14 }}>
                     Endereço:{' '}
-                  </Box>
-                  {order.address}
+                  </Typography>
+                  <Typography>{order.address}</Typography>
+                </Typography>
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  sx={{ display: 'block', mt: 1 }}>
+                  <Typography component={'span'} sx={{ fontWeight: 700 }}>
+                    Total:{' '}
+                  </Typography>
+                  <Typography>{formatCurrency(total)}</Typography>
                 </Typography>
               </Box>
               {next?.length ? (

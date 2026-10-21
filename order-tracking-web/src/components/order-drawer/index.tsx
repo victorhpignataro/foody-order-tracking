@@ -1,4 +1,5 @@
 import { ordersApi } from '@/api/order';
+import { CurrencyTextField } from '@components/currency-text-field';
 import { useSnackbar } from '@/context/snackbar-context/context';
 import { DeleteOutlined } from '@mui/icons-material';
 import AddIcon from '@mui/icons-material/Add';
@@ -21,8 +22,8 @@ type OrderFormValues = {
   address: string;
   items: {
     name: string;
-    quantity: number;
-    unitPrice: number;
+    quantity: number | undefined;
+    unitPrice: number | undefined;
   }[];
 };
 
@@ -63,7 +64,16 @@ export const OrderDrawer: FC<DrawerOrderProps> = ({
   };
 
   const { mutateAsync, isPending } = useMutation({
-    mutationFn: async (data: OrderFormValues) => {
+    mutationFn: async (_data: OrderFormValues) => {
+      const data = {
+        client: _data.client,
+        address: _data.address,
+        items: _data.items.map((item) => ({
+          name: item.name,
+          quantity: Number(item.quantity) || 0,
+          unitPrice: Number(item.unitPrice) || 0,
+        })),
+      };
       await ordersApi.create(data);
       queryClient.invalidateQueries({
         queryKey: ['orders'],
@@ -222,14 +232,16 @@ export const OrderDrawer: FC<DrawerOrderProps> = ({
                     min: { value: 0, message: 'Valor inválido' },
                   }}
                   render={({ field }) => (
-                    <TextField
-                      {...field}
+                    <CurrencyTextField
+                      name={field.name}
+                      value={field.value}
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                      inputRef={field.ref}
                       label="Preço unitário (R$)"
-                      type="number"
                       size="small"
                       error={!!errors.items?.[index]?.unitPrice}
                       helperText={errors.items?.[index]?.unitPrice?.message}
-                      onChange={(e) => field.onChange(Number(e.target.value))}
                     />
                   )}
                 />
@@ -240,7 +252,9 @@ export const OrderDrawer: FC<DrawerOrderProps> = ({
           <Button
             size="small"
             startIcon={<AddIcon />}
-            onClick={() => append({ name: '', quantity: 1, unitPrice: 0 })}
+            onClick={() =>
+              append({ name: '', quantity: undefined, unitPrice: undefined })
+            }
             sx={{ alignSelf: 'flex-start' }}>
             Adicionar item
           </Button>
