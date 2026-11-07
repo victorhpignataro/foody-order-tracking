@@ -1,8 +1,10 @@
 package com.foody.order_tracking_server.service;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -12,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.foody.order_tracking_server.dto.order.OrderCreateDto;
 import com.foody.order_tracking_server.dto.order.OrderDto;
+import com.foody.order_tracking_server.events.OrderStatusChangedEvent;
 import com.foody.order_tracking_server.exception.InvalidStatusTransitionException;
 import com.foody.order_tracking_server.exception.OrderNotFoundException;
 import com.foody.order_tracking_server.mappers.OrderMapper;
@@ -23,10 +26,13 @@ import com.foody.order_tracking_server.repository.OrderRepository;
 public class OrderService {
   private final OrderRepository orderRepository;
   private final OrderMapper orderMapper;
+  private final ApplicationEventPublisher eventPublisher;
 
-  public OrderService(OrderMapper orderMapper, OrderRepository orderRepository) {
+  public OrderService(OrderMapper orderMapper, OrderRepository orderRepository,
+      ApplicationEventPublisher eventPublisher) {
     this.orderRepository = orderRepository;
     this.orderMapper = orderMapper;
+    this.eventPublisher = eventPublisher;
   }
 
   @Transactional(readOnly = true)
@@ -53,12 +59,17 @@ public class OrderService {
     Order entity = orderRepository.findById(orderId)
         .orElseThrow(() -> new OrderNotFoundException(orderId));
 
-    if (!entity.getStatus().canTransitionTo(newStatus)) {
-      throw new InvalidStatusTransitionException(entity.getStatus(), newStatus);
+    OrderStatusEnum oldStatus = entity.getStatus();
+
+    if (!oldStatus.canTransitionTo(newStatus)) {
+      throw new InvalidStatusTransitionException(oldStatus, newStatus);
     }
 
     entity.setStatus(newStatus);
     Order saved = orderRepository.save(entity);
+
+    eventPublisher.publishEvent(new OrderStatusChangedEvent(
+        saved.getId(), oldStatus.name(), newStatus.name(), Instant.now()));
 
     return orderMapper.entityToDto(saved);
   }
