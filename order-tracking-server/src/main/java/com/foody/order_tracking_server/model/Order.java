@@ -53,6 +53,19 @@ public class Order {
     this.status = OrderStatusEnum.RECEIVED;
   }
 
+  public Order(Long id,
+      String client,
+      String address,
+      List<OrderItem> items, OrderStatusEnum status, LocalDateTime createdAt) {
+    this.id = id;
+    this.client = client;
+    this.address = address;
+    this.items = items;
+    this.status = status;
+    this.createdAt = createdAt;
+
+  }
+
   public Long getId() {
     return id;
   }
@@ -109,6 +122,12 @@ public class Order {
 
   public void setCreatedAt(LocalDateTime createdAt) {
     this.createdAt = createdAt;
+  }
+
+  @Override
+  public String toString() {
+    return "Order [id=" + id + ", client=" + client + ", address=" + address + ", items=" + items + ", status=" + status
+        + ", createdAt=" + createdAt + "]";
   }
 
 }

@@ -10,6 +10,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -38,6 +39,9 @@ class OrderServiceTest {
 
     @Mock
     private OrderMapper orderMapper;
+
+    @Mock
+    private ApplicationEventPublisher publisher;
 
     @InjectMocks
     private OrderService orderService;
@@ -97,8 +101,8 @@ class OrderServiceTest {
         when(orderRepository.findById(999L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> orderService.findById(999L))
-            .isInstanceOf(OrderNotFoundException.class)
-            .hasMessageContaining("Pedido não encontrado: 999");
+                .isInstanceOf(OrderNotFoundException.class)
+                .hasMessageContaining("Pedido não encontrado: 999");
 
         verify(orderRepository).findById(999L);
         verifyNoInteractions(orderMapper);
@@ -136,7 +140,8 @@ class OrderServiceTest {
         updatedOrder.setStatus(OrderStatusEnum.IN_PREPARATION);
         updatedOrder.addItem(sampleItem);
 
-        OrderDto updatedDto = new OrderDto(1L, "João Silva", "Rua A, 123", OrderStatusEnum.IN_PREPARATION, null, List.of());
+        OrderDto updatedDto = new OrderDto(1L, "João Silva", "Rua A, 123", OrderStatusEnum.IN_PREPARATION, null,
+                List.of());
 
         when(orderRepository.findById(1L)).thenReturn(Optional.of(sampleOrder));
         when(orderRepository.save(any(Order.class))).thenReturn(updatedOrder);
@@ -156,9 +161,9 @@ class OrderServiceTest {
         when(orderRepository.findById(1L)).thenReturn(Optional.of(sampleOrder)); // RECEIVED
 
         assertThatThrownBy(() -> orderService.changeStatus(1L, OrderStatusEnum.DELIVERED))
-            .isInstanceOf(com.foody.order_tracking_server.exception.InvalidStatusTransitionException.class)
-            .hasMessageContaining("RECEIVED")
-            .hasMessageContaining("DELIVERED");
+                .isInstanceOf(com.foody.order_tracking_server.exception.InvalidStatusTransitionException.class)
+                .hasMessageContaining("RECEIVED")
+                .hasMessageContaining("DELIVERED");
 
         verify(orderRepository, never()).save(any());
         verifyNoInteractions(orderMapper);
@@ -170,7 +175,7 @@ class OrderServiceTest {
         when(orderRepository.findById(1L)).thenReturn(Optional.of(sampleOrder));
 
         assertThatThrownBy(() -> orderService.changeStatus(1L, OrderStatusEnum.CANCELED))
-            .isInstanceOf(com.foody.order_tracking_server.exception.InvalidStatusTransitionException.class);
+                .isInstanceOf(com.foody.order_tracking_server.exception.InvalidStatusTransitionException.class);
 
         verify(orderRepository, never()).save(any());
     }
@@ -180,7 +185,7 @@ class OrderServiceTest {
         when(orderRepository.findById(1L)).thenReturn(Optional.of(sampleOrder));
 
         assertThatThrownBy(() -> orderService.changeStatus(1L, OrderStatusEnum.RECEIVED))
-            .isInstanceOf(com.foody.order_tracking_server.exception.InvalidStatusTransitionException.class);
+                .isInstanceOf(com.foody.order_tracking_server.exception.InvalidStatusTransitionException.class);
 
         verify(orderRepository, never()).save(any());
     }
@@ -190,8 +195,8 @@ class OrderServiceTest {
         when(orderRepository.findById(999L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> orderService.changeStatus(999L, OrderStatusEnum.IN_PREPARATION))
-            .isInstanceOf(OrderNotFoundException.class)
-            .hasMessageContaining("Pedido não encontrado: 999");
+                .isInstanceOf(OrderNotFoundException.class)
+                .hasMessageContaining("Pedido não encontrado: 999");
 
         verify(orderRepository).findById(999L);
         verify(orderRepository, never()).save(any());
